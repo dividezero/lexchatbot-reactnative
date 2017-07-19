@@ -31,14 +31,14 @@ class ChatScreen extends React.Component {
         return (
             <KeyboardAvoidingView style={styles.container} behavior="padding">
                 <View style={styles.nav}/>
-                <Header title="Dentalbot 👩‍⚕️"/>
+                <Header title={appConfig.bot.name}/>
                 <ScrollView style={styles.messageArea}>
-                    <BotMessage message={"Hi, I'm the Dental Clinic Bot. How can I help you today?"}/>
+                    <BotMessage message={appConfig.bot.initMessage}/>
                     {
                         this.state.messages.map((obj, key) => {
                             console.log(this.state.messages);
                             if (obj.dialogState === "ReadyForFulfillment") {
-                                return <BotMessage message={"Done! Anything else I can help you with?"} key={key}/>
+                                return <BotMessage message={appConfig.bot.completeMessage} key={key}/>
                             } else if (obj.userMessage) {
                                 return <UserMessage message={obj.message} key={key}/>
                             } else {
@@ -137,7 +137,7 @@ const Header = ({title, leftOnPress, rightOnPress}) => {
             flexDirection: 'row',
             padding: 10,
             justifyContent: "space-between",
-            backgroundColor: 'grey'
+            backgroundColor: 'black'
         }}>
             <View style={{
                 flex: 0.2,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
         width: chatWidth,
         padding: 15,
         backgroundColor: 'steelblue',
-        borderRadius: 20
+        borderRadius: 12
     },
     messageText: {
         color: 'white'
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
         width: chatWidth,
         padding: 15,
         backgroundColor: 'green',
-        borderRadius: 20,
+        borderRadius: 12,
     },
     chatInput: {
         height: 40,
