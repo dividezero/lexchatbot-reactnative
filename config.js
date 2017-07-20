@@ -7,9 +7,22 @@ const appConfig = {
     "botName": "",
     "userId": "",
     bot: {
-        name: "Dentalbot 👩‍⚕️",
-        initMessage: "Hi, I'm the Dental Clinic Bot. How can I help you today?",
-        completeMessage: "Done! Anything else I can help you with?"
+        name: "IT Bot 🤖",
+        initMessage: "Hi, I'm the IT Bot. How can I help you today?",
+        completeMessage: "Well too bad! Anything else I can help you with?"
+    },
+    theme: {
+        header:{
+            bgColor: "black",
+            textColor: "white",
+        },
+        message:{
+            botMsgBgColor: "steelblue",
+            botMsgTextColor: "white",
+            userMsgBgColor: "green",
+            userMsgTextColor: "white",
+            dateTextColor: "white" //auto opacity 0.8
+        }
     }
 };
 export default appConfig;

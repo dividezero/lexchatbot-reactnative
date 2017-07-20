@@ -22,7 +22,10 @@ class ChatScreen extends React.Component {
         this.sendMessage = this.sendMessage.bind(this);
         this.state = {
             text: null,
-            messages: []
+            messages: [{
+                message: appConfig.bot.initMessage,
+                datetime: new Date().toLocaleString()
+            }]
         };
 
     }
@@ -32,20 +35,19 @@ class ChatScreen extends React.Component {
             <KeyboardAvoidingView style={styles.container} behavior="padding">
                 <View style={styles.nav}/>
                 <Header title={appConfig.bot.name}/>
-                <ScrollView style={styles.messageArea}>
-                    <BotMessage message={appConfig.bot.initMessage}/>
-                    {
-                        this.state.messages.map((obj, key) => {
-                            console.log(this.state.messages);
-                            if (obj.dialogState === "ReadyForFulfillment") {
-                                return <BotMessage message={appConfig.bot.completeMessage} key={key}/>
-                            } else if (obj.userMessage) {
-                                return <UserMessage message={obj.message} key={key}/>
-                            } else {
-                                return <BotMessage message={obj.message} key={key}/>
-                            }
-                        })
-                    }
+                <ScrollView>
+                    <View style={styles.messageArea}>
+                        {
+                            this.state.messages.map((obj, key) => {
+                                console.log(this.state.messages);
+                                if (obj.userMessage) {
+                                    return <UserMessage message={obj.message} datetime={obj.datetime} key={key}/>
+                                } else {
+                                    return <BotMessage message={obj.message} datetime={obj.datetime} key={key}/>
+                                }
+                            })
+                        }
+                    </View>
                 </ScrollView>
                 <TextInput
                     style={styles.chatInput}
@@ -58,13 +60,19 @@ class ChatScreen extends React.Component {
                     }}
                     value={this.state.text}
                     onSubmitEditing={(event) => {
-                        console.log('send message', this.state.text)
-                        this.updateMessages({userMessage: true, message: this.state.text});
-                        this.sendMessage(this.state.text);
+                        if (this.state.text) {
+                            console.log('send message', this.state.text)
+                            this.updateMessages({
+                                userMessage: true,
+                                message: this.state.text,
+                                datetime: new Date().toLocaleString()
+                            });
+                            this.sendMessage(this.state.text);
 
-                        let state = this.state;
-                        state.text = "";
-                        this.setState(state);
+                            let state = this.state;
+                            state.text = "";
+                            this.setState(state);
+                        }
                     }}
                 />
             </KeyboardAvoidingView>
@@ -99,6 +107,11 @@ class ChatScreen extends React.Component {
         lexruntime.postText(params, (err, data) => {
             if (err) console.log(err, err.stack); // an error occurred
             else {
+                if (data.dialogState === "ReadyForFulfillment") {
+                    data.message = appConfig.bot.completeMessage;
+                }
+
+                data.datetime = new Date().toLocaleString();
                 this.updateMessages(data);
             }
         });
@@ -111,21 +124,23 @@ class ChatScreen extends React.Component {
     }
 }
 
-const BotMessage = ({message}) => {
+const BotMessage = ({message, datetime}) => {
     return (
         <View style={styles.botMessage}>
             <View style={styles.botMessageBubble}>
-                <Text style={styles.messageText}>{message}</Text>
+                <Text style={styles.botMessageText}>{message}</Text>
+                <Text style={styles.datetimeText}>{datetime}</Text>
             </View>
         </View>
     );
 };
 
-const UserMessage = ({message}) => {
+const UserMessage = ({message, datetime}) => {
     return (
         <View style={styles.userMessage}>
             <View style={styles.userMessageBubble}>
-                <Text style={styles.messageText}>{message}</Text>
+                <Text style={styles.userMessageText}>{message}</Text>
+                <Text style={styles.datetimeText}>{datetime}</Text>
             </View>
         </View>
     );
@@ -137,7 +152,7 @@ const Header = ({title, leftOnPress, rightOnPress}) => {
             flexDirection: 'row',
             padding: 10,
             justifyContent: "space-between",
-            backgroundColor: 'black'
+            backgroundColor: appConfig.theme.header.bgColor
         }}>
             <View style={{
                 flex: 0.2,
@@ -165,7 +180,7 @@ const Header = ({title, leftOnPress, rightOnPress}) => {
                 <Text style={{
                     backgroundColor: 'transparent',
                     textAlign: 'center',
-                    color: 'white',
+                    color: appConfig.theme.header.textColor,
                     fontSize: 20
                 }}>{title}</Text>
             </View>
@@ -203,7 +218,7 @@ const styles = StyleSheet.create({
     },
     messageArea: {
         flex: 1,
-        padding: 10
+        padding: 10,
     },
     botMessage: {
         flex: 1,
@@ -212,11 +227,21 @@ const styles = StyleSheet.create({
     botMessageBubble: {
         width: chatWidth,
         padding: 15,
-        backgroundColor: 'steelblue',
+        backgroundColor: appConfig.theme.message.botMsgBgColor,
         borderRadius: 12
     },
-    messageText: {
-        color: 'white'
+    botMessageText: {
+        color: appConfig.theme.message.botMsgTextColor
+    },
+    userMessageText: {
+        color: appConfig.theme.message.userMsgTextColor
+    },
+    datetimeText: {
+        fontSize: 11,
+        color: appConfig.theme.message.dateTextColor,
+        opacity: 0.8,
+        textAlign: 'right',
+        paddingTop: 5
     },
     userMessage: {
         flex: 1,
@@ -226,7 +251,7 @@ const styles = StyleSheet.create({
     userMessageBubble: {
         width: chatWidth,
         padding: 15,
-        backgroundColor: 'green',
+        backgroundColor: appConfig.theme.message.userMsgBgColor,
         borderRadius: 12,
     },
     chatInput: {
